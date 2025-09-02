@@ -42,7 +42,7 @@ jobs:
     - name: Build and Push Docker image
       run: |
         export DOCKER_BUILDKIT=0
-        IMAGE_URL="europe-west1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE:$GITHUB_SHA"
+        IMAGE_URL=europe-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
         echo "Building image: $IMAGE_URL"
         docker build -t "$IMAGE_URL" .
         echo "Pushing image: $IMAGE_URL"
