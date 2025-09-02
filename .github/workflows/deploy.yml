@@ -29,31 +29,26 @@ jobs:
 
     - name: Create Artifact Registry repository
       run: |
-        gcloud artifacts repositories create $REPOSITORY \
+        gcloud artifacts repositories create ${{ env.REPOSITORY }} \
           --repository-format=docker \
-          --location=$REGION \
+          --location=${{ env.REGION }} \
           --description="Docker repository for telegram bot" || true
 
-    - name: Disable Docker Buildx
+    - name: Build Docker image
       run: |
-        docker buildx rm builder || true
         export DOCKER_BUILDKIT=0
+        docker build -t europe-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }} .
 
-    - name: Build and Push Docker image
+    - name: Push Docker image  
       run: |
-        export DOCKER_BUILDKIT=0
-        IMAGE_URL=europe-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
-        echo "Building image: $IMAGE_URL"
-        docker build -t "$IMAGE_URL" .
-        echo "Pushing image: $IMAGE_URL"
-        docker push "$IMAGE_URL"
+        docker push europe-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
 
     - name: Deploy to Cloud Run
       run: |
-        gcloud run deploy $SERVICE \
-          --image europe-west1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE:$GITHUB_SHA \
+        gcloud run deploy ${{ env.SERVICE }} \
+          --image europe-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }} \
           --platform managed \
-          --region $REGION \
+          --region ${{ env.REGION }} \
           --allow-unauthenticated \
           --set-env-vars="TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}" \
           --set-env-vars="OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" \
