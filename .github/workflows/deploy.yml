@@ -34,9 +34,19 @@ jobs:
           --location=${{ env.REGION }} \
           --description="Docker repository for telegram bot" || true
 
+    - name: Debug file structure
+      run: |
+        echo "Current directory:"
+        pwd
+        echo "Files in current directory:"
+        ls -la
+        echo "Checking for Dockerfile:"
+        ls -la Dockerfile || echo "Dockerfile not found"
+
     - name: Build Docker image
       run: |
         export DOCKER_BUILDKIT=0
+        echo "Building Docker image..."
         docker build -t europe-west1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }} .
 
     - name: Push Docker image  
