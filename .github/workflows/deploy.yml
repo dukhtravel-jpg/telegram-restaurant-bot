@@ -34,10 +34,18 @@ jobs:
           --location=$REGION \
           --description="Docker repository for telegram bot" || true
 
+    - name: Disable Docker Buildx
+      run: |
+        docker buildx rm builder || true
+        export DOCKER_BUILDKIT=0
+
     - name: Build and Push Docker image
       run: |
-        IMAGE_URL=europe-west1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE:$GITHUB_SHA 
+        export DOCKER_BUILDKIT=0
+        IMAGE_URL=europe-west1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE:$GITHUB_SHA
+        echo "Building image: $IMAGE_URL"
         docker build -t $IMAGE_URL .
+        echo "Pushing image: $IMAGE_URL"
         docker push $IMAGE_URL
 
     - name: Deploy to Cloud Run
