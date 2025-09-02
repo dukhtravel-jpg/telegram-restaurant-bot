@@ -38,11 +38,9 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build -t europe-west1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE:$GITHUB_SHA .
-
-    - name: Push Docker image
-      run: |
-        docker push europe-west1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE:$GITHUB_SHA
+        docker buildx build --platform linux/amd64 \
+          -t europe-west1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE:$GITHUB_SHA \
+          --push .
 
     - name: Deploy to Cloud Run
       run: |
