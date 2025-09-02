@@ -3,8 +3,6 @@ name: Deploy to Cloud Run
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
@@ -36,11 +34,11 @@ jobs:
           --location=$REGION \
           --description="Docker repository for telegram bot" || true
 
-    - name: Build Docker image
+    - name: Build and Push Docker image
       run: |
-        docker buildx build --platform linux/amd64 \
-          -t europe-west1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE:$GITHUB_SHA \
-          --push .
+        IMAGE_URL=europe-west1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$SERVICE:$GITHUB_SHA 
+        docker build -t $IMAGE_URL .
+        docker push $IMAGE_URL
 
     - name: Deploy to Cloud Run
       run: |
